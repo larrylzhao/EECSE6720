@@ -8,6 +8,7 @@ def calc_prior(e, f, cnt, N):
     return (e + cnt) / (N + e + f)
 
 
+# this one has overflow issues
 def calc_pred_distr(N, a, b, X, x_new):
     part1 = ((N + b) / (N + b + 1))
     part1 = part1 ** (X + a)
@@ -15,6 +16,7 @@ def calc_pred_distr(N, a, b, X, x_new):
     constant = math.factorial(X + x_new + a - 1) / (math.factorial(x_new) * math.factorial(X + a - 1))
     print(part1, part2, constant)
     return part1 * part2 * constant
+
 
 def calc_pred_distr2(N, a, b, X, x_new):
     part1 = (X + a) * math.log10((N + b) / (N + b + 1))
@@ -75,32 +77,35 @@ print(spam_X_sum)
 true_pos = true_neg = false_pos = false_neg = 0
 
 for i in range(label_test.shape[0]):
-# for i in range(5):
     p_spam = prior_spam
     p_nonspam = prior_nonspam
     for feature in range(feature_cnt):
         p_spam *= calc_pred_distr2(spam_cnt_train, a, b, spam_X_sum[feature], X_test[i][feature])
         p_nonspam *= calc_pred_distr2(nonspam_cnt_train, a, b, nonspam_X_sum[feature], X_test[i][feature])
 
-    print(i+1, "\t", p_spam, "\t", p_nonspam)
+    p_actual_spam = 0
+    if (p_spam == 0) and (p_nonspam == 0):
+        p_actual_spam = .5
+    else:
+        p_actual_spam = p_spam / (p_spam + p_nonspam)
+    print(i+1, "\t", p_spam, "\t", p_nonspam, "\t", p_actual_spam)
 
-    result = False
+    result = "nonspam"
     correct = False
-    if p_spam > p_nonspam:
-        result = True
-    if label_test[i] == result:
-        correct = True
+    if p_actual_spam > .5:
+        result = "spam"
+    actual = label_test[i]
 
-    if result:
-        if correct:
+    if result == "spam":
+        if actual == 1:
             true_pos += 1
         else:
-            true_neg += 1
-    else:
-        if correct:
             false_pos += 1
-        else:
+    else:
+        if actual == 1:
             false_neg += 1
-
+            print("***********************************")
+        else:
+            true_neg += 1
 
 print(true_pos, true_neg, false_pos, false_neg)
