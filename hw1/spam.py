@@ -1,8 +1,9 @@
+# 171 231 48 11
+
 import csv
 import numpy as np
 import math
-# import matpyplot
-
+import matplotlib.pyplot as plt
 
 def calc_prior(e, f, cnt, N):
     return (e + cnt) / (N + e + f)
@@ -24,6 +25,10 @@ def calc_pred_distr2(N, a, b, X, x_new):
     constant = math.log10(math.factorial(X + x_new + a - 1)) - math.log10(math.factorial(x_new)) - math.log10(math.factorial(X + a - 1))
     # print(part1, part2, constant)
     return 10 ** (part1 + part2 + constant)
+
+#plot E[lambda1] = a+sum(xi1) / b+n1 and E[lambda0]
+def calc_E_lambda(N, a, b, X):
+    return (a + X) / (b + N)
 
 
 # open files into numpy arrays
@@ -60,18 +65,15 @@ spam_train = X_train[0:spam_cnt_train]
 nonspam_train = X_train[spam_cnt_train:N]
 
 
-
 # calculate the priors
 prior_spam = calc_prior(e, f, spam_cnt_train, N)
 prior_nonspam = calc_prior(e, f, nonspam_cnt_train, N)
 
-print(prior_spam)
-print(prior_nonspam)
+
 # calculate the predictive distributions
 
 spam_X_sum = spam_train.sum(axis=0)
 nonspam_X_sum = nonspam_train.sum(axis=0)
-print(spam_X_sum)
 
 
 true_pos = true_neg = false_pos = false_neg = 0
@@ -88,7 +90,7 @@ for i in range(label_test.shape[0]):
         p_actual_spam = .5
     else:
         p_actual_spam = p_spam / (p_spam + p_nonspam)
-    print(i+1, "\t", p_spam, "\t", p_nonspam, "\t", p_actual_spam)
+    print(i+1, "\t", p_spam, "\t", p_nonspam, "\t", p_actual_spam, end='\t')
 
     result = "nonspam"
     correct = False
@@ -99,13 +101,44 @@ for i in range(label_test.shape[0]):
     if result == "spam":
         if actual == 1:
             true_pos += 1
+            print("true pos")
         else:
             false_pos += 1
+            print("false pos")
     else:
         if actual == 1:
             false_neg += 1
-            print("***********************************")
+            print("false neg")
         else:
             true_neg += 1
+            print("false pos")
 
 print(true_pos, true_neg, false_pos, false_neg)
+
+
+# draw plots for 4c
+words = [line.rstrip('\n') for line in open('README')]
+
+E_lambda_1 = [0] * feature_cnt
+E_lambda_0 = [0] * feature_cnt
+
+print(X_test[371])
+for feature in range(feature_cnt):
+    E_lambda_1[feature] = calc_E_lambda(spam_cnt_train, a, b, spam_X_sum[feature])
+    E_lambda_0[feature] = calc_E_lambda(nonspam_cnt_train, a, b, nonspam_X_sum[feature])
+
+print(E_lambda_1[18])
+
+print(words)
+
+x = np.array(list(range(feature_cnt)))
+plt.xticks(x, words)
+plt.xticks(rotation=70)
+plt.plot(x, E_lambda_1, label="E[lambda1]")
+plt.plot(x, E_lambda_0, label="E[lambda0]")
+plt.plot(x, X_test[263], label="Test case #264")
+plt.xlabel("feature")
+plt.ylabel("occurrences")
+plt.title("Test case #264: P(SPAM) = 0.5")
+plt.legend()
+plt.show()
