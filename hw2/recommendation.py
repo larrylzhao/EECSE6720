@@ -1,6 +1,8 @@
 import csv
 import numpy as np
 from scipy.stats import norm
+import time
+import datetime
 
 d=5
 c=1
@@ -28,49 +30,104 @@ for line in input:
     input_dict_v[line[1]][line[0]] = line[2]
 
 
-# initialize U and V from Normal(0, 0.1I)
 U = {}
 V = {}
 U_old = {}
 V_old = {}
+EPhi = {}
 
+# initialize U and V from Normal(0, 0.1I)
 for i in range(1, N+1):
     U[i] = np.matrix(np.random.normal(0, 0.1, d)).T
 for j in range(1, M+1):
-    V[i] = np.matrix(np.random.normal(0, 0.1, d)).T
-
-
-Ephi = {}
-
-def EPhi(i, j):
-    r_ij = input_dict_u[i][j]
-    dot_product = np.dot(np.transpose(U_old[i]), V_old[j])
-    pdf = norm.pdf(-1 * dot_product)
-    cdf = norm.cdf(-1 * dot_product)
-    if r_ij == 1:
-        return pdf/(1-cdf) + dot_product
-    else:
-        return pdf/cdf + dot_product
+    V[j] = np.matrix(np.random.normal(0, 0.1, d)).T
 
 identity = np.identity(d, dtype=float)
-
 def update_U():
     for i in range(1, N+1):
         term_1 = identity
         term_2 = np.zeros((d, 1), dtype=float)
         for j in input_dict_u[i].keys():
             term_1 = term_1 + V[j].dot(V[j].T)
-            term_2 = term_2 + V[j]*Ephi[(i, j)]
+            term_2 = term_2 + V[j]*EPhi[(i, j)]
         U[i] = np.linalg.inv(term_1).dot(term_2)
 
 def update_V():
     for j in range(1, M+1):
-        term_1 = identity
-        term_2 = np.zeros((d, 1), dtype=float)
-        for i in input_dict_v[j].keys():
-            term_1 = term_1 + U[i].dot(U[i].T)
-            term_2 = term_2 + U[i]*Ephi[(i, j)]
-        V[j] = np.linalg.inv(term_1).dot(term_2)
+        if j in input_dict_v.keys():
+            term_1 = identity
+            term_2 = np.zeros((d, 1), dtype=float)
+            for i in input_dict_v[j].keys():
+                term_1 = term_1 + U[i].dot(U[i].T)
+                term_2 = term_2 + U[i]*EPhi[(i, j)]
+            V[j] = np.linalg.inv(term_1).dot(term_2)
 
 
-update_U()
+def update_EPhi():
+    for i in range(1, N+1):
+        for j in input_dict_u[i].keys():
+            r_ij = input_dict_u[i][j]
+            # dot_product = np.dot(np.transpose(U_old[i]), V_old[j])
+            dot_product = U_old[i].T.dot(V_old[j])[0, 0]
+            pdf = norm.pdf(-1 * dot_product)
+            cdf = norm.cdf(-1 * dot_product)
+            if r_ij == 1:
+                EPhi[(i, j)] = (pdf/(1-cdf) + dot_product)
+            else:
+                EPhi[(i, j)] = (-1 * pdf/cdf + dot_product)
+
+
+dln = d / 2 * np.log(1 / 2 / np.pi / c)
+LNP = 0.0
+def update_LNP():
+    term_1 = 0.0
+    term_2 = 0.0
+    term_3 = 0.0
+    for i in range(1, N+1):
+        term_1 += dln - ( (U[i].T.dot(U[i]))[0, 0] / 2 )
+    for j in range(1, M+1):
+        term_2 += dln - ( (V[j].T.dot(V[j]))[0, 0] / 2 )
+    for i in range(1, N+1):
+        for j in input_dict_u[i].keys():
+            r_ij = input_dict_u[i][j]
+            if r_ij == 1:
+                term_3 += np.log(norm.cdf((U[i].T.dot(V[j]))[0, 0]))
+            else:
+                term_3 += np.log(1 - norm.cdf((U[i].T.dot(V[j]))[0, 0]))
+    # print(term_1, term_2, term_3)
+    return term_1 + term_2 + term_3
+
+def getTime():
+    ts = time.time()
+    return "[" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S') + "] "
+
+
+# U_old = dict(U)
+# V_old = dict(V)
+# update_EPhi()
+# print (Ephi)
+# update_U()
+
+print(dln)
+print("***************************************")
+
+for t in range(1, 101):
+    U_old = dict(U)
+    V_old = dict(V)
+    print(getTime() + "iteration " + str(t))
+
+    print(getTime() + "updating EPhi ")
+    update_EPhi()
+    print(getTime() + "updating U ")
+    update_U()
+    print(getTime() + "updating V ")
+    update_V()
+    print(getTime() + "updating LNP ")
+    LNP = update_LNP()
+    print(getTime() + "LNP: " + str(LNP))
+
+    print("***************************************")
+
+
+
+
