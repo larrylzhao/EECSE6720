@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import norm
 import time
 import datetime
+import pickle
 
 d=5
 c=1
@@ -102,11 +103,7 @@ def getTime():
     return "[" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S') + "] "
 
 
-# U_old = dict(U)
-# V_old = dict(V)
-# update_EPhi()
-# print (Ephi)
-# update_U()
+f_lnp = open("output/lnnp_1.txt", "w")
 
 print(dln)
 print("***************************************")
@@ -125,9 +122,51 @@ for t in range(1, 101):
     print(getTime() + "updating LNP ")
     LNP = update_LNP()
     print(getTime() + "LNP: " + str(LNP))
-
+    f_lnp.write(str(LNP) + "\n")
     print("***************************************")
 
+
+# save U, V, and EPhi
+with open('output/U.pkl', 'wb') as f:
+    pickle.dump(U, f, pickle.HIGHEST_PROTOCOL)
+with open('output/V.pkl', 'wb') as f:
+    pickle.dump(U, f, pickle.HIGHEST_PROTOCOL)
+with open('output/EPhi.pkl', 'wb') as f:
+    pickle.dump(U, f, pickle.HIGHEST_PROTOCOL)
+
+U_tmp = {}
+with open('output/U.pkl', 'rb') as f:
+    U_tmp = pickle.load(f)
+
+
+# evaluate test data
+true_pos = true_neg = false_pos = false_neg = 0
+
+# open files into numpy arrays
+reader = csv.reader(open("ratings_test.csv", "r"), delimiter=",")
+x = list(reader)
+test_input = np.array(x).astype("int")
+
+for entry in test_input:
+    i = entry[0]
+    j = entry[1]
+    r = entry[2]
+
+    pr1 = np.log(norm.cdf((U[i].T.dot(V[j]))[0, 0]))
+    pr0 = np.log(1 - norm.cdf((U[i].T.dot(V[j]))[0, 0]))
+
+    if pr1 > pr0:
+        if r == 1:
+            true_pos += 1
+        else:
+            false_pos += 1
+    else:
+        if r == 1:
+            false_neg += 1
+        else:
+            true_neg += 1
+
+print(true_pos, true_neg, false_pos, false_neg)
 
 
 
