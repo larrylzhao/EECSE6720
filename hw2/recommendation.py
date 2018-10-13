@@ -103,7 +103,7 @@ def getTime():
     return "[" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S') + "] "
 
 
-f_lnp = open("output/lnnp_1.txt", "w")
+f_lnp = open("output/lnnp_2.txt", "w")
 
 print(dln)
 print("***************************************")
@@ -142,7 +142,7 @@ with open('output/U.pkl', 'rb') as f:
 # evaluate test data
 true_pos = true_neg = false_pos = false_neg = 0
 
-# open files into numpy arrays
+# open test file into numpy arrays
 reader = csv.reader(open("ratings_test.csv", "r"), delimiter=",")
 x = list(reader)
 test_input = np.array(x).astype("int")
