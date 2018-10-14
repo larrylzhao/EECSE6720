@@ -4,6 +4,7 @@ from scipy.stats import norm
 import time
 import datetime
 import pickle
+import matplotlib.pyplot as plt
 
 d=5
 c=1
@@ -103,8 +104,7 @@ def getTime():
     return "[" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S') + "] "
 
 
-f_lnp = open("output/lnnp_2.txt", "w")
-
+f_lnp = open("output/lnnp_6.txt", "w")
 print(dln)
 print("***************************************")
 
@@ -169,4 +169,35 @@ for entry in test_input:
 print(true_pos, true_neg, false_pos, false_neg)
 
 
+# draw plots
+with open("hw2/output/lnnp_1.txt") as f:
+    lines1 = f.read().splitlines()
+    lines1 = [float(i) for i in lines1[:99]]
 
+with open("hw2/output/lnnp_2.txt") as f:
+    lines2 = f.read().splitlines()
+    lines2 = [float(i) for i in lines2[:99]]
+
+with open("hw2/output/lnnp_3.txt") as f:
+    lines3 = f.read().splitlines()
+    lines3 = [float(i) for i in lines3[:99]]
+
+with open("hw2/output/lnnp_4.txt") as f:
+    lines4 = f.read().splitlines()
+    lines4 = [float(i) for i in lines4[:99]]
+
+with open("hw2/output/lnnp_5.txt") as f:
+    lines5 = f.read().splitlines()
+    lines5 = [float(i) for i in lines5[:99]]
+
+
+x = np.array(list(range(20, 100)))
+plt.plot(x, lines1[18:98], label="run 1")
+plt.plot(x, lines2[18:98], label="run 2")
+plt.plot(x, lines3[18:98], label="run 3")
+plt.plot(x, lines4[18:98], label="run 4")
+plt.plot(x, lines5[18:98], label="run 5")
+plt.xlabel("iteration")
+plt.ylabel("lnp(R, U, V)")
+plt.legend()
+plt.show()
