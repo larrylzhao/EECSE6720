@@ -1,5 +1,7 @@
 import csv
 import numpy as np
+import math
+from scipy.special import digamma
 from scipy.stats import norm
 import time
 import datetime
@@ -35,14 +37,32 @@ def create_diag(N, a_prime, b_prime):
     return diag
 
 
-def update_q_w(x_input, a_prime, b_prime, N, e_prime, f_prime):
+def update_q_w(x_input, y_input, a_prime, b_prime, N, e_prime, f_prime):
     sigma_prime = 0
+    mu_prime = 0
     for i in range(N):
         x_i = np.matrix(x_input[i])
         sigma_prime = sigma_prime + x_i.dot(x_i.T)
+        mu_prime = mu_prime + (y_input[i] * x_i)
     sigma_prime = (e_prime/f_prime)*sigma_prime
+    mu_prime = (e_prime/f_prime)*mu_prime
     sigma_prime = (create_diag(N, a_prime, b_prime) + sigma_prime)
-    return sigma_prime
+    sigma_prime = np.linalg.inv(sigma_prime)
+    mu_prime = sigma_prime.dot(mu_prime)
+    return sigma_prime, mu_prime
+
+
+def calc_L_term_1(N, D, a_prime, b_prime, mu_prime):
+    term_1 = -1 * D * math.log(2 * math.pi) / 2
+    term_2 = 0
+    for k in range(D):
+        term_2 += digamma(a_prime[k]) - math.log(b_prime[k])
+    term_2 = term_2/2
+    term_3 = -0.5 * np.trace(mu_prime.dot(mu_prime.T).dot(create_diag(N, a_prime, b_prime)))
+    return term_1 + term_2 + term_3
+
+
+
 
 
 def vi_regression(data):
