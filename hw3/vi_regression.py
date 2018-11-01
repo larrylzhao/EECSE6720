@@ -2,12 +2,7 @@ import csv
 import numpy as np
 import math
 from scipy.special import digamma, gammaln
-from scipy.stats import norm
-import time
-import datetime
-import pickle
 import matplotlib.pyplot as plt
-
 
 
 def update_q_lambda(x_input,  y_input, e0, f0, N, mu_prime, sigma_prime):
