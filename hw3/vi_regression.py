@@ -39,14 +39,14 @@ def create_diag(D, a_prime, b_prime):
 
 def update_q_w(D, x_input, y_input, a_prime, b_prime, N, e_prime, f_prime):
     mu_prime = np.zeros(shape=(D,1), dtype='float64')
-    sigma_prime = np.diag(np.ones(D, dtype='float64'))
+    sigma_prime = np.diag(np.zeros(D, dtype='float64'))
     for i in range(N):
         x_i = np.matrix(x_input[i]).T
         sigma_prime = sigma_prime + x_i.dot(x_i.T)
         mu_prime = mu_prime + (y_input[i][0] * x_i)
     sigma_prime = (e_prime/f_prime)*sigma_prime
     mu_prime = (e_prime/f_prime)*mu_prime
-    sigma_prime = (create_diag(D, a_prime, b_prime) + sigma_prime)
+    sigma_prime = create_diag(D, a_prime, b_prime) + sigma_prime
     sigma_prime = np.linalg.inv(sigma_prime)
     mu_prime = sigma_prime.dot(mu_prime)
     return mu_prime, sigma_prime
@@ -66,7 +66,7 @@ def calc_L_term_2(e0, f0, e_prime, f_prime):
     term_1 = e0 * math.log(f0)
     term_2 = -1 * gammaln(e0)
     term_3 = (e0 - 1) * (digamma(e_prime) - math.log(f_prime))
-    term_4 = f0 * e_prime / f_prime
+    term_4 = -1 * f0 * e_prime / f_prime
     return term_1 + term_2 + term_3 + term_4
 
 
@@ -77,7 +77,7 @@ def calc_L_term_3(D, a0, b0, a_prime, b_prime):
     for k in range(D):
         term_3 = (a0 - 1) * (digamma(a_prime[k][0]) - math.log(b_prime[k][0]))
         term_4 = b0 * a_prime[k][0] / b_prime[k][0]
-        L_term_3 = L_term_3 + term_1 + term_2 + term_3 + term_4
+        L_term_3 = L_term_3 + term_1 + term_2 + term_3 - term_4
     return L_term_3
 
 
@@ -95,14 +95,13 @@ def calc_L_term_4(N, e_prime, f_prime, y_input, x_input, mu_prime, sigma_prime):
 def calc_L_term_5(N, sigma_prime):
     term_1 = N * math.log(2 * math.pi * math.e)
     sign, term_2 = np.linalg.slogdet(sigma_prime)
-    return -0.5 * (term_1 + sign * term_2)
+    return 0.5 * (term_1 + sign * term_2)
 
 
 def calc_L_term_6(e_prime, f_prime):
     term_1 = math.log(f_prime)
     term_2 = -1 * gammaln(e_prime)
-    term_3 = (e_prime - 1) * (digamma(e_prime) - e_prime)
-    # print(term_1, term_2, term_3)
+    term_3 = (e_prime - 1) * (digamma(e_prime)) - e_prime
     return -1 * (term_1 + term_2 + term_3)
 
 
@@ -165,7 +164,6 @@ def vi_regression(data):
         # print(L_term_6)
         # print(L_term_7)
         L_list.append(L)
-
     plt.plot(range(500), L_list)
     plt.xlabel("iteration")
     plt.ylabel("variational objective function")
@@ -192,5 +190,7 @@ def vi_regression(data):
 
 
 vi_regression("1")
+vi_regression("2")
+vi_regression("3")
 
 
