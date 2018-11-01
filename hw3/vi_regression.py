@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 import math
-from scipy.special import digamma, gamma
+from scipy.special import digamma, gammaln
 from scipy.stats import norm
 import time
 import datetime
@@ -64,7 +64,7 @@ def calc_L_term_1(N, D, a_prime, b_prime, mu_prime):
 
 def calc_L_term_2(e0, f0, e_prime, f_prime):
     term_1 = e0 * math.log(f0)
-    term_2 = -1 * math.log(gamma(e0))
+    term_2 = -1 * gammaln(e0)
     term_3 = (e0 - 1) * (digamma(e_prime) - math.log(f_prime))
     term_4 = f0 * e_prime / f_prime
     return term_1 + term_2 + term_3 + term_4
@@ -73,7 +73,7 @@ def calc_L_term_2(e0, f0, e_prime, f_prime):
 def calc_L_term_3(D, a0, b0, a_prime, b_prime):
     L_term_3 = 0
     term_1 = a0 * math.log(b0)
-    term_2 = -1 * math.log(gamma(a0))
+    term_2 = -1 * gammaln(a0)
     for k in range(D):
         term_3 = (a0 - 1) * (digamma(a_prime[k][0]) - math.log(b_prime[k][0]))
         term_4 = b0 * a_prime[k][0] / b_prime[k][0]
@@ -100,15 +100,16 @@ def calc_L_term_5(N, sigma_prime):
 
 def calc_L_term_6(e_prime, f_prime):
     term_1 = math.log(f_prime)
-    term_2 = -1 * math.log(gamma(e_prime))
+    term_2 = -1 * gammaln(e_prime)
     term_3 = (e_prime - 1) * (digamma(e_prime) - e_prime)
+    # print(term_1, term_2, term_3)
     return -1 * (term_1 + term_2 + term_3)
 
 
 def calc_L_term_7(D, a_prime, b_prime):
     L_term_7 = 0
     for k in range(D):
-        term_1 = math.log(b_prime[k][0]) - math.log(gamma(a_prime[k][0]))
+        term_1 = math.log(b_prime[k][0]) - gammaln(a_prime[k][0])
         term_2 = (a_prime[k][0] - 1) * digamma(a_prime[k][0])
         term_3 = -1 * a_prime[k][0]
         L_term_7 = L_term_7 + term_1 + term_2 + term_3
@@ -143,7 +144,7 @@ def vi_regression(data):
 
     L_list = []
 
-    for i in range(50):
+    for i in range(500):
         e_prime, f_prime = update_q_lambda(x_input, y_input, e0, f0, N, mu_prime, sigma_prime)
         a_prime, b_prime = update_q_alpha(D, a0, b0, mu_prime, sigma_prime)
         mu_prime, sigma_prime = update_q_w(D, x_input, y_input, a_prime, b_prime, N, e_prime, f_prime)
@@ -155,10 +156,17 @@ def vi_regression(data):
         L_term_6 = calc_L_term_6(e_prime, f_prime)
         L_term_7 = calc_L_term_7(D, a_prime, b_prime)
         L = (L_term_1 + L_term_2 + L_term_3 + L_term_4 + L_term_5 + L_term_6 + L_term_7)
-        print(i, L)
+        print(i, L, "*******************************")
+        # print(L_term_1)
+        # print(L_term_2)
+        # print(L_term_3)
+        # print(L_term_4)
+        # print(L_term_5)
+        # print(L_term_6)
+        # print(L_term_7)
         L_list.append(L)
 
-    plt.plot(range(50), L_list)
+    plt.plot(range(500), L_list)
     plt.xlabel("iteration")
     plt.ylabel("variational objective function")
     plt.title("Set " + data)
