@@ -72,4 +72,3 @@ plt.ylabel('Log Likelihood')
 plt.title('Objective Function')
 plt.show()
 
-
