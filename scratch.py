@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-mu_prime = np.ones(shape=(3,1), dtype='float64')
-temp = 5 * mu_prime
-print(temp)
+
 
 # with open("hw2/output/lnnp_1.txt") as f:
 #     lines1 = f.read().splitlines()

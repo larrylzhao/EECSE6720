@@ -45,13 +45,13 @@ def em(K, iterations):
         f_t = 0
         for i in range(n):
             for j in range(K):
-                f_t += phi[i,j] * np.log(binom.pmf(x[i], 20, theta[j]) * pi[j])
+                f_t += phi[i,j] * np.log(binom.pmf(x[i], 20, theta[j]) * pi[j] / phi[i,j])
         f.append(f_t)
 
     return f, phi
 
 
-iterations = 5
+iterations = 50
 f, phi = em(3, iterations)
 
 # with open('output/f.pkl', 'wb') as f:
