@@ -69,6 +69,9 @@ def update_q_theta(a_0, q_c, x, b_0, n, K):
     return a, b
 
 
+
+
+
 def vi(K, iterations):
     x = fetch_data()
     n = x.shape[0]

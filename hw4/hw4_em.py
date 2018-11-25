@@ -5,6 +5,7 @@ from scipy.stats import binom
 from scipy.special import digamma, gammaln
 import pickle
 import matplotlib.pyplot as plt
+np.random.seed(0)
 
 # read in data
 def fetch_data():
@@ -13,6 +14,8 @@ def fetch_data():
     x = [i[0] for i in x]
     x_input = np.array(x).astype("int")
     return x_input
+
+
 
 
 def em(K, iterations):
@@ -24,18 +27,27 @@ def em(K, iterations):
 
     for t in range(iterations):
         print (t)
+        if t == 14:
+            print("hit 14")
         phi = np.zeros((n, K))
         for i in range(n):
             for j in range(K):
                 denom = 0
                 for k in range(K):
-                    denom += pi[k] * binom.pmf(x[i], 20, theta[k])
-                num = pi[j] * binom.pmf(x[i], 20, theta[j])
+                    pmf = binom.pmf(x[i], 20, theta[k])
+                    if math.isnan(pmf):
+                        pmf = 0
+                    denom += pi[k] * pmf
+                pmf = binom.pmf(x[i], 20, theta[j])
+                if math.isnan(pmf):
+                    pmf = 0
+                num = pi[j] * pmf
                 phi[i, j] = num / denom
-
+        print(phi)
         # n_j = np.zeros(n)
         for j in range(K):
             n_j = 0
+            theta[j] = 0
             for i in range(n):
                 n_j += phi[i,j]
                 theta[j] += phi[i,j] * x[i] / 20
@@ -51,8 +63,21 @@ def em(K, iterations):
     return f, phi
 
 
+def plot_scatter(x, n, K, phi):
+    best = [0]*n
+    for i in range(n):
+        max = 0
+        for j in range(K):
+            if phi[i][j] > max:
+                max = phi[i][j]
+                best[i] = j
+    plt.scatter(x, best)
+    plt.show()
+
+
 iterations = 50
-f, phi = em(3, iterations)
+K = 9
+f, phi = em(K, iterations)
 
 # with open('output/f.pkl', 'wb') as f:
 #     pickle.dump(f, f, pickle.HIGHEST_PROTOCOL)
@@ -71,4 +96,10 @@ plt.xlabel('t')
 plt.ylabel('Log Likelihood')
 plt.title('Objective Function')
 plt.show()
+
+
+print(phi)
+x = fetch_data()
+n = x.shape[0]
+plot_scatter(x, n, K, phi)
 
