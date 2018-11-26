@@ -43,7 +43,7 @@ def update_q_c(n, K, a, b, alpha, x):
             for k in range(K):
                 tk3 = q_c_t3(k, alpha)
                 denom += np.exp(x[i]*t1 + (20-x[i])*t2 + tk3)
-            q_c[i][j] = num / denom
+            q_c[i,j] = num / denom
     return q_c
 
 
@@ -64,11 +64,27 @@ def update_q_theta(a_0, q_c, x, b_0, n, K):
     b = [b_0]*K
     for j in range(K):
         for i in range(n):
-            a[j] += q_c[i][j] * x[i]
-            b[j] += q_c[i][j] * (20-x[i])
+            a[j] += q_c[i,j] * x[i]
+            b[j] += q_c[i,j] * (20-x[i])
     return a, b
 
 
+def calc_L_t_1(n, K, q_c, x, a, b):
+    t1 = 0
+    for i in range(n):
+        for j in range(K):
+            t1 += q_c[i,j] * (x[i] * q_c_t1(a[j], b[j]) + (20-x[i]) * q_c_t2(a[j], b[j]))
+    return t1
+
+
+def calc_L_t_2():
+    temp1 = 0
+    temp2 = 0
+    temp3 = 0
+    temp4 = 0
+    t2 = 0
+    for i in range(n):
+        for j in range(K):
 
 
 
