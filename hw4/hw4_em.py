@@ -43,8 +43,7 @@ def em(K, iterations):
                     pmf = 0
                 num = pi[j] * pmf
                 phi[i, j] = num / denom
-        print(phi)
-        # n_j = np.zeros(n)
+        # print(phi)
         for j in range(K):
             n_j = 0
             theta[j] = 0
@@ -72,34 +71,44 @@ def plot_scatter(x, n, K, phi):
                 max = phi[i][j]
                 best[i] = j
     plt.scatter(x, best)
+    plt.xlabel('integer')
+    plt.ylabel('cluster')
+    plt.title('Most Probable Cluster')
     plt.show()
 
 
 iterations = 50
+K = 3
+x = fetch_data()
+n = x.shape[0]
+f3, phi3 = em(K, iterations)
+plot_scatter(x, n, K, phi3)
 K = 9
-f, phi = em(K, iterations)
+f9, phi9 = em(K, iterations)
+plot_scatter(x, n, K, phi9)
+K = 15
+f15, phi15 = em(K, iterations)
+plot_scatter(x, n, K, phi15)
 
 # with open('output/f.pkl', 'wb') as f:
 #     pickle.dump(f, f, pickle.HIGHEST_PROTOCOL)
-# with open('output/phi.pkl', 'wb') as f:
-#     pickle.dump(phi, f, pickle.HIGHEST_PROTOCOL)
+# with open('output/phi3.pkl', 'wb') as f:
+#     pickle.dump(phi3, f, pickle.HIGHEST_PROTOCOL)
 #
 # with open('output/f.pkl', 'rb') as f:
 #     f2 = pickle.load(f)
-# with open('output/phi.pkl', 'rb') as f:
-#     phi2 = pickle.load(f)
+# with open('output/phi3.pkl', 'rb') as f:
+#     phi3 = pickle.load(f)
 #
 # print(f)
 
-plt.plot(range(1,iterations), f[1:])
+plt.plot(range(1,iterations), f3[1:], label="K=3")
+plt.plot(range(1,iterations), f9[1:], label="K=9")
+plt.plot(range(1,iterations), f15[1:], label="K=15")
 plt.xlabel('t')
 plt.ylabel('Log Likelihood')
 plt.title('Objective Function')
+plt.legend()
 plt.show()
 
-
-print(phi)
-x = fetch_data()
-n = x.shape[0]
-plot_scatter(x, n, K, phi)
 
