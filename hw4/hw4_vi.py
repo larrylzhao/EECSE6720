@@ -33,6 +33,7 @@ def phi_t3(j, alpha):
     return digamma(alpha[j]) - digamma(alpha_sum)
 
 
+#deprecated
 def update_phi(n, K, a, b, alpha, x):
     phi = np.empty((n, K))
     for i in range(n):
@@ -47,6 +48,25 @@ def update_phi(n, K, a, b, alpha, x):
                 tk2 = phi_t2(a[k], b[k])
                 tk3 = phi_t3(k, alpha)
                 denom += np.exp(x[i]*tk1 + (20-x[i])*tk2 + tk3)
+            phi[i,j] = num / denom
+    return phi
+
+
+def update_phi_alt(n, K, a, b, alpha, x):
+    phi = np.empty((n, K))
+    t1 = []
+    t2 = []
+    t3 = []
+    for k in range(K):
+        t1.append(phi_t1(a[k], b[k]))
+        t2.append(phi_t2(a[k], b[k]))
+        t3.append(phi_t3(k, alpha))
+    for i in range(n):
+        denom = 0
+        for k in range(K):
+            denom += np.exp(x[i]*t1[k] + (20-x[i])*t2[k] + t3[k])
+        for j in range(K):
+            num = np.exp(x[i]*t1[j] + (20-x[i])*t2[j] + t3[j])
             phi[i,j] = num / denom
     return phi
 
@@ -165,8 +185,11 @@ def vi(K, iterations):
 
     for t in range(iterations):
         print(t)
-        phi = update_phi(n, K, a, b, alpha, x)
+        phi = update_phi_alt(n, K, a, b, alpha, x)
         print(phi)
+        # phi_alt = update_phi_alt(n, K, a, b, alpha, x)
+        # if np.array_equal(phi, phi_alt):
+        #     print("not equal!!")
         n_j = set_n_j(phi, n, K)
         alpha = update_q_pi(alpha_0, n_j)
         a, b = update_q_theta(a_0, phi, x, b_0, n, K)
@@ -184,7 +207,7 @@ def vi(K, iterations):
 x = fetch_data()
 n = x.shape[0]
 iterations = 1000
-K = 15
+K = 3
 L3, phi3 = vi(K, iterations)
 plot_scatter(x, n, K, phi3)
 
