@@ -43,8 +43,10 @@ def update_phi(n, K, a, b, alpha, x):
             num = np.exp(x[i]*t1 + (20-x[i])*t2 + t3)
             denom = 0
             for k in range(K):
+                tk1 = phi_t1(a[k], b[k])
+                tk2 = phi_t2(a[k], b[k])
                 tk3 = phi_t3(k, alpha)
-                denom += np.exp(x[i]*t1 + (20-x[i])*t2 + tk3)
+                denom += np.exp(x[i]*tk1 + (20-x[i])*tk2 + tk3)
             phi[i,j] = num / denom
     return phi
 
@@ -154,9 +156,11 @@ def vi(K, iterations):
     alpha_0 = alpha_0 / 10
     alpha = np.random.rand(K)
     a_0 = 0.5
-    a = np.random.rand(K)
+    a = [a_0]*K
+    # a = np.random.rand(K)
     b_0 = 0.5
-    b = np.random.rand(K)
+    b = [b_0]*K
+    # b = np.random.rand(K)
     L = []
 
     for t in range(iterations):
@@ -179,8 +183,8 @@ def vi(K, iterations):
 
 x = fetch_data()
 n = x.shape[0]
-iterations = 50
-K = 3
+iterations = 1000
+K = 15
 L3, phi3 = vi(K, iterations)
 plot_scatter(x, n, K, phi3)
 
