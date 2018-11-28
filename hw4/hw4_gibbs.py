@@ -115,13 +115,13 @@ def gibbs(iterations):
     return clusters, largest_clusters
 
 
-iterations = 3
-clusters, largest = gibbs(iterations)
-
-with open('output/clusters.pkl', 'wb') as f:
-    pickle.dump(clusters, f, pickle.HIGHEST_PROTOCOL)
-with open('output/largest.pkl', 'wb') as f:
-    pickle.dump(largest, f, pickle.HIGHEST_PROTOCOL)
+iterations = 1000
+# clusters, largest = gibbs(iterations)
+#
+# with open('output/clusters.pkl', 'wb') as f:
+#     pickle.dump(clusters, f, pickle.HIGHEST_PROTOCOL)
+# with open('output/largest.pkl', 'wb') as f:
+#     pickle.dump(largest, f, pickle.HIGHEST_PROTOCOL)
 
 with open('output/clusters.pkl', 'rb') as f:
     clusters = pickle.load(f)
@@ -138,8 +138,7 @@ for i in largest:
 
 
 for i in range(len(largest_six)):
-    plt.plot(range(iterations), largest_six[i], label=str(i+1))
-plt.legend()
+    plt.plot(range(iterations), largest_six[i])
 plt.xlabel('t')
 plt.ylabel('# points in cluster')
 plt.show()
