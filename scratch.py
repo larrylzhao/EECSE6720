@@ -1,7 +1,21 @@
-import matplotlib.pyplot as plt
+import csv
 import numpy as np
+import math
+from scipy.stats import binom
+from scipy.misc import comb
+from scipy.special import digamma, gammaln
+import pickle
+import matplotlib.pyplot as plt
+np.random.seed(0)
 
 
+# read in data
+def fetch_data():
+    reader = csv.reader(open("x.csv", "r"), delimiter=",")
+    x = list(reader)
+    x = [i[0] for i in x]
+    x_input = np.array(x).astype("int")
+    return x_input
 
 # with open("hw2/output/lnnp_1.txt") as f:
 #     lines1 = f.read().splitlines()

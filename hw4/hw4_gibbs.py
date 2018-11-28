@@ -30,8 +30,10 @@ def gibbs(iterations):
     n = {}
     theta = {}
     for i in range(30):
-        n[i] = list(range(N))
+        n[i] = []
         theta[i] = np.random.beta(a_0, b_0)
+    # place all points in one cluster to begin
+    n[0] = list(range(N))
 
     # precalculate the phis
     p_c = []
@@ -116,16 +118,16 @@ def gibbs(iterations):
 
 
 iterations = 1000
-# clusters, largest = gibbs(iterations)
-#
-# with open('output/clusters.pkl', 'wb') as f:
-#     pickle.dump(clusters, f, pickle.HIGHEST_PROTOCOL)
-# with open('output/largest.pkl', 'wb') as f:
-#     pickle.dump(largest, f, pickle.HIGHEST_PROTOCOL)
+clusters, largest = gibbs(iterations)
 
-with open('output/clusters.pkl', 'rb') as f:
+with open('output/clusters2.pkl', 'wb') as f:
+    pickle.dump(clusters, f, pickle.HIGHEST_PROTOCOL)
+with open('output/largest2.pkl', 'wb') as f:
+    pickle.dump(largest, f, pickle.HIGHEST_PROTOCOL)
+
+with open('output/clusters2.pkl', 'rb') as f:
     clusters = pickle.load(f)
-with open('output/largest.pkl', 'rb') as f:
+with open('output/largest2.pkl', 'rb') as f:
     largest = pickle.load(f)
 
 largest_six = [[], [], [], [], [], []]
