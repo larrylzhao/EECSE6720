@@ -44,13 +44,16 @@ def gibbs(iterations):
 
     for t in range(iterations):
         print(t)
-        clusters_cnt = [len(n[i]) for i in n]
-        clusters_cnt.sort(reverse=True)
-        if len(n.keys()) < 6:
-            largest_clusters.append(clusters_cnt)
-        else:
-            largest_clusters.append(clusters_cnt[:6])
         clusters.append(len(n.keys()))
+
+        clusters_cnt = []
+        for i in n:
+            clusters_cnt.append(len(n[i]))
+        clusters_cnt.sort(reverse=True)
+        length = 6
+        if len(n.keys()) < 6:
+            length = len(n.keys())
+        largest_clusters.append(clusters_cnt[:length])
 
         for i in range(N):
             phi = []
@@ -68,14 +71,9 @@ def gibbs(iterations):
             # sample the index c[i] from a discrete distribution with this parameter
             c[i] = int(np.random.choice(len(phi), 1, p=phi))
 
-            # if c[i] in n:
-            #     n[c[i]].append(i)
-            # else:
-            #     n[c[i]] = [i]
-
-            try:
+            if c[i] in n:
                 n[c[i]].append(i)
-            except KeyError:
+            else:
                 n[c[i]] = [i]
 
             # generate theta j
@@ -83,24 +81,25 @@ def gibbs(iterations):
             if c[i] == j:
                 theta[j] = np.random.beta(a_0 + x[i], b_0 + 20 - x[i])
 
-            n = { k : v for k,v in n.items() if len(v) > 0}
-            exist_c = list(n.keys())
-            theta_n = {}
-            for k in range(len(exist_c)):
-                theta_n[k] = theta[exist_c[k]]
-            theta = theta_n
-            # Reindex clusters
-            c_n = []
+            c_positive = []
+            for clust, points in n.items():
+                if len(points) > 0:
+                    c_positive.append(clust)
             n = {}
+            theta_temp = {}
+            for k in range(len(c_positive)):
+                theta_temp[k] = theta[c_positive[k]]
+            theta = theta_temp
+            c_temp = []
             for k in range(N):
-                for j in range(len(exist_c)):
-                    if c[k] == exist_c[j]:
-                        c_n.append(j)
-                        try:
+                for j in range(len(c_positive)):
+                    if c[k] == c_positive[j]:
+                        c_temp.append(j)
+                        if j in n:
                             n[j].append(k)
-                        except KeyError:
+                        else:
                             n[j] = [k]
-            c = c_n
+            c = c_temp
 
         print(str(t) + " 2")
         for j in n:
@@ -116,7 +115,7 @@ def gibbs(iterations):
     return clusters, largest_clusters
 
 
-iterations = 1000
+iterations = 3
 clusters, largest = gibbs(iterations)
 
 with open('output/clusters.pkl', 'wb') as f:
@@ -129,20 +128,17 @@ with open('output/clusters.pkl', 'rb') as f:
 with open('output/largest.pkl', 'rb') as f:
     largest = pickle.load(f)
 
-largest_six_split = {0:[], 1:[], 2:[], 3:[], 4:[], 5:[]}
+largest_six = [[], [], [], [], [], []]
 for i in largest:
     for j in range(len(i)):
-        largest_six_split[j].append(i[j])
+        largest_six[j].append(i[j])
     if len(i) < 6:
         for k in range(len(i), 6):
-            largest_six_split[k].append(0)
+            largest_six[k].append(0)
 
 
-
-
-plt.figure(figsize=(10,10))
-for i in largest_six_split:
-    plt.plot(range(iterations), largest_six_split[i], label=str(i+1)+'th Largest')
+for i in range(len(largest_six)):
+    plt.plot(range(iterations), largest_six[i], label=str(i+1))
 plt.legend()
 plt.xlabel('t')
 plt.ylabel('# points in cluster')
